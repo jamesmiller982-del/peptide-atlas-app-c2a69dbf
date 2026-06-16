@@ -2410,7 +2410,7 @@
     <div class="hero">
       <div class="hero-eyebrow">51 Profiles · Evidence-Weighted · Cleaned Up June 2026</div>
       <h1>A reference for the peptides <em>everyone is talking about</em>, ranked by what the science actually shows.</h1>
-      <p class="hero-sub">Search the database, browse by goal, calculate reconstitutions, and build stacks with real-time interaction checking. Evidence tiers separate FDA-approved compounds from anecdote-only marketing. Saved stacks stay private in this browser only — there is no account sync or shared database.</p>
+      <p class="hero-sub">Search the database, browse by goal, calculate reconstitutions, and build stacks with real-time interaction checking. Effectiveness tiers rank available data, real-world signal, and goal fit; FDA status is listed separately and does not determine the score. Saved stacks stay private in this browser only — there is no account sync or shared database.</p>
     </div>
 
     <div class="search-row">
@@ -3515,11 +3515,11 @@ const blends = [
 // Non-destructive additions added June 2026: clearer multi-category chips,
 // stronger risk/evidence labels, and curated goal tags. Doses/original text are not changed here.
 const evidenceProfiles = {
-  A: { label:'Approved / strongest clinical footing', className:'approved' },
-  B: { label:'Human clinical / medical-use signal', className:'clinical' },
-  C: { label:'Limited human data / emerging', className:'limited' },
-  D: { label:'Experimental / weak human evidence', className:'experimental' },
-  E: { label:'High-risk or fringe evidence', className:'high-risk' },
+  A: { label:'Most effective / strongest available data', className:'approved' },
+  B: { label:'Strong effect signal / useful human data', className:'clinical' },
+  C: { label:'Promising but limited data', className:'limited' },
+  D: { label:'Weak or experimental effectiveness signal', className:'experimental' },
+  E: { label:'Low-confidence or high-risk signal', className:'high-risk' },
 };
 
 const peptideCleanup = {
@@ -3557,7 +3557,7 @@ function labelForUseCase(id) { const u = useCases.find(x => x.id === id); return
 function displayCategoriesFor(p) { return uniqueList(p.displayCategories || [p.category, ...(p.useCases || []).slice(0, 2).map(labelForUseCase)]); }
 function riskLabelFor(p) {
   if (['igf-1-lr3','igf-1-des','follistatin','ace-031','foxo4-dri','dihexa','p21','ll-37'].includes(p.id)) return { label:'High caution', className:'high-risk' };
-  if ((p.fdaStatus || '').toLowerCase().includes('fda-approved')) return { label:'FDA-approved context', className:'approved' };
+  if ((p.fdaStatus || '').toLowerCase().includes('fda-approved')) return { label:'FDA status noted separately', className:'approved' };
   if ((p.banned || []).includes('WADA')) return { label:'WADA prohibited', className:'experimental' };
   if ((p.fdaStatus || '').toLowerCase().includes('research')) return { label:'Research / uncertain', className:'experimental' };
   return null;
@@ -5419,7 +5419,7 @@ function openProfile(id) {
       <div class="modal-section">
         <h4>Goal Fit & Evidence Notes</h4>
         ${categoryChipsHtml(p, 8)}
-        <div class="quality-note"><strong>Evidence/risk note:</strong> ${p.evidenceNote}<br><strong>Storage privacy:</strong> Saved stacks are stored in your own browser only. They are not synced to other visitors.</div>
+        <div class="quality-note"><strong>Tier basis:</strong> Tier grades are based on effectiveness signal, available human/preclinical data, safety context, and goal fit — not FDA approval alone.<br><strong>Evidence/risk note:</strong> ${p.evidenceNote}<br><strong>Storage privacy:</strong> Saved stacks are stored in your own browser only. They are not synced to other visitors.</div>
       </div>
 
       <div class="modal-section">
@@ -5476,7 +5476,7 @@ function openProfile(id) {
         <div class="legal-block">
           <strong>Status:</strong> ${p.fdaStatus}<br>
           ${(p.banned || []).length ? '<strong>Banned by:</strong> ' + p.banned.join(', ') : '<strong>Sports status:</strong> Not currently on major banned lists'}<br>
-          <strong>Review note:</strong> ${p.sourceNeeded ? 'This profile should be checked against current FDA/label/PubMed sources before relying on protocol details.' : 'This profile includes source support, but current medical/regulatory status can still change.'}
+          <strong>Review note:</strong> ${p.sourceNeeded ? 'This profile should be checked against current FDA/label/PubMed sources before relying on protocol details.' : 'This profile includes source support, but effectiveness, safety, and regulatory status should still be reviewed before relying on protocol details.'}
         </div>
       </div>
 
