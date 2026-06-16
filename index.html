@@ -2164,6 +2164,30 @@
 
   .modal-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+  .category-chip-row { display:flex; flex-wrap:wrap; gap:0.35rem; margin:0.55rem 0 0.25rem; }
+  .category-chip {
+    display:inline-flex; align-items:center; gap:0.25rem;
+    background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.24);
+    color:var(--accent); border-radius:999px; padding:0.22rem 0.55rem;
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .evidence-chip {
+    display:inline-flex; align-items:center; border-radius:999px; padding:0.24rem 0.62rem;
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.08em; border:1px solid var(--border);
+    color:var(--text-secondary); background:var(--bg-elevated);
+  }
+  .evidence-chip.approved, .evidence-chip.clinical { border-color:rgba(86,179,105,0.45); color:var(--tier-a); background:rgba(86,179,105,0.08); }
+  .evidence-chip.limited { border-color:rgba(212,175,55,0.42); color:var(--accent); background:rgba(212,175,55,0.08); }
+  .evidence-chip.experimental { border-color:rgba(209,133,85,0.45); color:var(--tier-d); background:rgba(209,133,85,0.08); }
+  .evidence-chip.high-risk { border-color:rgba(232,90,79,0.45); color:var(--warning-critical); background:rgba(232,90,79,0.08); }
+  .quality-note {
+    background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.22);
+    color:var(--text-secondary); border-radius:8px; padding:0.85rem 1rem;
+    line-height:1.55; font-size:0.88rem;
+  }
+
   .modal-calc-pill {
     display: inline-flex;
     align-items: center;
@@ -2384,9 +2408,9 @@
   <!-- BROWSE / SEARCH VIEW -->
   <section class="view active" id="view-browse">
     <div class="hero">
-      <div class="hero-eyebrow">51 Profiles · Evidence-Weighted · May 2026</div>
+      <div class="hero-eyebrow">51 Profiles · Evidence-Weighted · Cleaned Up June 2026</div>
       <h1>A reference for the peptides <em>everyone is talking about</em>, ranked by what the science actually shows.</h1>
-      <p class="hero-sub">Search the database, browse by goal, calculate reconstitutions, and build stacks with real-time interaction checking. Evidence tiers separate FDA-approved compounds from anecdote-only marketing.</p>
+      <p class="hero-sub">Search the database, browse by goal, calculate reconstitutions, and build stacks with real-time interaction checking. Evidence tiers separate FDA-approved compounds from anecdote-only marketing. Saved stacks stay private in this browser only — there is no account sync or shared database.</p>
     </div>
 
     <div class="search-row">
@@ -2581,8 +2605,8 @@
 </main>
 
 <footer>
-  <p>The Peptide Atlas · Reference compiled May 2026 · Not medical advice</p>
-  <p>Regulatory landscape changes frequently. Many compounds discussed are not FDA-approved for the uses described.</p>
+  <p>The Peptide Atlas · Reference compiled May 2026 · Cleaned up June 2026 · Not medical advice</p>
+  <p>Saved stacks are stored only in this browser's localStorage. Regulatory landscape changes frequently. Many compounds discussed are not FDA-approved for the uses described.</p>
 </footer>
 
 <!-- PROFILE MODAL -->
@@ -3487,6 +3511,79 @@ const blends = [
   },
 ];
 
+// === DATA CLEANUP / QUALITY LAYER ===
+// Non-destructive additions added June 2026: clearer multi-category chips,
+// stronger risk/evidence labels, and curated goal tags. Doses/original text are not changed here.
+const evidenceProfiles = {
+  A: { label:'Approved / strongest clinical footing', className:'approved' },
+  B: { label:'Human clinical / medical-use signal', className:'clinical' },
+  C: { label:'Limited human data / emerging', className:'limited' },
+  D: { label:'Experimental / weak human evidence', className:'experimental' },
+  E: { label:'High-risk or fringe evidence', className:'high-risk' },
+};
+
+const peptideCleanup = {
+  'ghk-cu': { addUseCases:['recovery','aesthetic','antioxidant'], displayCategories:['Healing','Skin & Aesthetic','Hair','Recovery'], evidenceNote:'Good topical/cosmetic familiarity, but systemic injection claims are much less established.' },
+  'bpc-157': { addUseCases:['recovery','pain'], displayCategories:['Healing','Gut','Tendon/Ligament','Recovery'], evidenceNote:'Strong preclinical and anecdotal use; human clinical evidence and compounding status require caution.' },
+  'tb-500': { addUseCases:['recovery'], displayCategories:['Healing','Tendon/Ligament','Recovery','Hair'], evidenceNote:'Mostly preclinical/anecdotal for soft-tissue recovery; keep pro-angiogenic/cancer cautions visible.' },
+  'kpv': { addUseCases:['healing'], displayCategories:['Gut','Immune','Skin','Healing'], evidenceNote:'Best framed as anti-inflammatory/gut-skin support, not a broad repair peptide.' },
+  'tesamorelin': { addUseCases:['metabolic'], displayCategories:['GH Axis','Metabolic','Visceral Fat','Longevity'], evidenceNote:'One of the cleaner evidence stories because it has an FDA-approved indication for HIV-associated lipodystrophy.' },
+  'mots-c': { addUseCases:['recovery'], displayCategories:['Longevity','Metabolic','Mitochondrial','Recovery'], evidenceNote:'Mitochondrial/metabolic rationale is promising, but mainstream clinical use is still limited.' },
+  'ss-31': { addUseCases:['metabolic','antioxidant'], displayCategories:['Longevity','Cardiac','Mitochondrial','Antioxidant'], evidenceNote:'Mitochondrial/cardiac angle is more credible than many longevity peptides, but access and indications vary.' },
+  'dsip': { addUseCases:['recovery'], displayCategories:['Sleep','Recovery','Cognitive'], evidenceNote:'Sleep/recovery fit is logical, but evidence is not as strong as mainstream sleep medicine.' },
+  'epitalon': { addUseCases:['recovery'], displayCategories:['Longevity','Sleep','Recovery'], evidenceNote:'Longevity claims should be presented as speculative by Western evidence standards.' },
+  'semaglutide': { addUseCases:['cardiac'], displayCategories:['GLP-1','Fat Loss','Metabolic','Cardiovascular'], evidenceNote:'Strong clinical/FDA evidence for weight/metabolic indications; protect lean mass with protein and resistance training.' },
+  'tirzepatide': { addUseCases:['longevity'], displayCategories:['GLP-1','Fat Loss','Metabolic'], evidenceNote:'Strong clinical/FDA evidence for weight/metabolic indications; avoid casual stacking with other appetite agents.' },
+  'retatrutide': { addUseCases:['longevity'], displayCategories:['GLP-1','Fat Loss','Metabolic','Investigational'], evidenceNote:'Promising but investigational relative to semaglutide/tirzepatide.' },
+  'cagrilintide': { displayCategories:['Amylin','Fat Loss','Metabolic','Investigational'], evidenceNote:'Best shown as an appetite/metabolic adjunct rather than a general peptide wellness tool.' },
+  'survodutide': { displayCategories:['GLP-1/Glucagon','Fat Loss','Metabolic','Investigational'], evidenceNote:'Investigational profile; medical supervision and liver/GI context matter.' },
+  'pt-141': { displayCategories:['Sexual Health','Melanocortin','Prescription'], evidenceNote:'FDA-approved as bremelanotide for a specific indication; not a general libido toy.' },
+  'melanotan-ii': { addUseCases:['skin'], displayCategories:['Melanocortin','Aesthetic/Tanning','Sexual Health'], evidenceNote:'Keep melanoma/pigmentation cautions front-and-center; not an FDA-approved tanning drug.' },
+  'melanotan-i': { displayCategories:['Melanocortin','Aesthetic/Tanning','Skin'], evidenceNote:'Afamelanotide has narrow approved medical contexts; cosmetic tanning use is a different risk category.' },
+  'kisspeptin': { displayCategories:['Sexual Health','Fertility','HPG Axis'], evidenceNote:'Goal fit is hormone-axis signaling/fertility, not direct sexual performance.' },
+  'ara-290': { addUseCases:['recovery','cognitive'], displayCategories:['Healing','Pain','Immune','Neuropathy'], evidenceNote:'Pain/neuropathy and inflammatory recovery are the better fit than broad healing claims.' },
+  'nad-plus': { addUseCases:['antioxidant'], displayCategories:['Longevity','Metabolic','Recovery','Redox'], evidenceNote:'Popular and biologically plausible; benefits depend heavily on route, context, and expectations.' },
+  'glutathione': { addUseCases:['skin'], displayCategories:['Antioxidant','Immune','Longevity','Skin'], evidenceNote:'Better framed as redox/antioxidant support than a peptide-like performance compound.' },
+  'thymosin-alpha-1': { displayCategories:['Immune','Longevity','Prescription/Clinical'], evidenceNote:'One of the more clinically grounded immune peptides, but indication/access vary by country.' },
+  'll-37': { addUseCases:['recovery'], displayCategories:['Immune','Antimicrobial','Healing'], evidenceNote:'High caution: antimicrobial/immune biology can be context-dependent and is not casual self-experiment territory.' },
+  'igf-1-lr3': { displayCategories:['Body Composition','IGF-1 Axis','High Risk'], evidenceNote:'High-risk experimental anabolic category; cancer/glucose/organ-growth concerns should dominate the profile.' },
+  'igf-1-des': { displayCategories:['Body Composition','IGF-1 Axis','High Risk'], evidenceNote:'High-risk experimental anabolic category; local growth claims are not the same as safe clinical utility.' },
+  'follistatin': { displayCategories:['Body Composition','Myostatin','High Risk'], evidenceNote:'Very high-risk experimental anabolic/myostatin area; avoid presenting as routine bodybuilding support.' },
+  'ace-031': { displayCategories:['Body Composition','Myostatin','High Risk'], evidenceNote:'Very high-risk experimental anabolic/myostatin area; not a casual stack candidate.' },
+};
+
+function uniqueList(items) { return [...new Set((items || []).filter(Boolean))]; }
+function labelForUseCase(id) { const u = useCases.find(x => x.id === id); return u ? u.name.replace(/ & .*/, '').replace(/ \/ .*/, '') : id; }
+function displayCategoriesFor(p) { return uniqueList(p.displayCategories || [p.category, ...(p.useCases || []).slice(0, 2).map(labelForUseCase)]); }
+function riskLabelFor(p) {
+  if (['igf-1-lr3','igf-1-des','follistatin','ace-031','foxo4-dri','dihexa','p21','ll-37'].includes(p.id)) return { label:'High caution', className:'high-risk' };
+  if ((p.fdaStatus || '').toLowerCase().includes('fda-approved')) return { label:'FDA-approved context', className:'approved' };
+  if ((p.banned || []).includes('WADA')) return { label:'WADA prohibited', className:'experimental' };
+  if ((p.fdaStatus || '').toLowerCase().includes('research')) return { label:'Research / uncertain', className:'experimental' };
+  return null;
+}
+function applyPeptideCleanup() {
+  peptides.forEach(p => {
+    const add = peptideCleanup[p.id] || {};
+    p.useCases = uniqueList([...(p.useCases || []), ...(add.addUseCases || [])]);
+    p.displayCategories = uniqueList(add.displayCategories || [p.category]);
+    p.evidenceProfile = evidenceProfiles[p.tier] || evidenceProfiles.D;
+    p.riskProfile = riskLabelFor(p);
+    p.evidenceNote = add.evidenceNote || 'Category and goal fit reviewed for consistency; confirm medical/regulatory details before acting.';
+    p.sourceNeeded = !p.studies || p.studies.length < 2 || ['D','E'].includes(p.tier);
+  });
+}
+function categoryChipsHtml(item, limit = 4) {
+  return '<div class="category-chip-row">' + displayCategoriesFor(item).slice(0, limit).map(c => `<span class="category-chip">${c}</span>`).join('') + '</div>';
+}
+function evidenceChipsHtml(p) {
+  const chips = [`<span class="evidence-chip ${p.evidenceProfile.className}">${p.evidenceProfile.label}</span>`];
+  if (p.riskProfile) chips.push(`<span class="evidence-chip ${p.riskProfile.className}">${p.riskProfile.label}</span>`);
+  if (p.sourceNeeded) chips.push('<span class="evidence-chip experimental">Source review needed</span>');
+  return chips.join('');
+}
+applyPeptideCleanup();
+
 // === STATE ===
 let activeView = 'browse';
 let stackList = [];
@@ -3761,6 +3858,8 @@ function renderBrowse() {
           <span class="tier-badge ${item.tier}">Tier ${item.tier}</span>
         </div>
         <div class="card-cat">${item.category}</div>
+        ${categoryChipsHtml(item)}
+        <div class="modal-meta" style="margin:0.45rem 0 0.35rem;">${evidenceChipsHtml(item)}</div>
         <p class="card-desc">${item.description}</p>
         <div class="card-stats">
           <div>
@@ -3833,6 +3932,7 @@ function renderUsecase() {
           <div>
             <div class="tier-name">${p.name}</div>
             <div class="tier-meta">${p.dose} · ${p.frequency} · ${p.route}</div>
+            <div class="tier-meta">${displayCategoriesFor(p).slice(0,3).join(' · ')}</div>
           </div>
           <span class="tier-badge ${p.tier}">Tier ${p.tier}</span>
         </div>
@@ -5302,7 +5402,7 @@ function openProfile(id) {
         <div class="modal-subtitle">${p.altName || ''}</div>
         <div class="modal-meta">
           <span class="tier-badge ${p.tier}">Evidence Tier ${p.tier}</span>
-          <span class="tier-badge B" style="background:rgba(212,175,55,0.12);color:var(--accent);"><span style="display:none;"></span>${p.category}</span>
+          ${evidenceChipsHtml(p)}
           ${p.vialSize !== null ? `<span class="modal-calc-pill" onclick="openCalculatorFor('${p.id}')">Open in calculator</span>` : ''}
         </div>
       </div>
@@ -5314,6 +5414,12 @@ function openProfile(id) {
         <h4>Overview</h4>
         <p>${p.description}</p>
         <p><strong>Mechanism:</strong> ${p.mechanism}</p>
+      </div>
+
+      <div class="modal-section">
+        <h4>Goal Fit & Evidence Notes</h4>
+        ${categoryChipsHtml(p, 8)}
+        <div class="quality-note"><strong>Evidence/risk note:</strong> ${p.evidenceNote}<br><strong>Storage privacy:</strong> Saved stacks are stored in your own browser only. They are not synced to other visitors.</div>
       </div>
 
       <div class="modal-section">
@@ -5369,7 +5475,8 @@ function openProfile(id) {
         <h4>Legal & Regulatory Status</h4>
         <div class="legal-block">
           <strong>Status:</strong> ${p.fdaStatus}<br>
-          ${(p.banned || []).length ? '<strong>Banned by:</strong> ' + p.banned.join(', ') : '<strong>Sports status:</strong> Not currently on major banned lists'}
+          ${(p.banned || []).length ? '<strong>Banned by:</strong> ' + p.banned.join(', ') : '<strong>Sports status:</strong> Not currently on major banned lists'}<br>
+          <strong>Review note:</strong> ${p.sourceNeeded ? 'This profile should be checked against current FDA/label/PubMed sources before relying on protocol details.' : 'This profile includes source support, but current medical/regulatory status can still change.'}
         </div>
       </div>
 
