@@ -6744,6 +6744,52 @@ function exportDoseLog() {
   showToast('Exported dose log');
 }
 
+// === FIRST-VISIT INTRO ===
+function showIntroModalIfNeeded() {
+  const introKey = 'introSeen_v2';
+  if (storeGet(introKey, false)) return;
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-head">
+      <div class="modal-head-info">
+        <div class="modal-title">Welcome to The Peptide Atlas</div>
+        <div class="modal-subtitle">Reference · Reconstitution · Stack Builder</div>
+      </div>
+      <button class="modal-close" onclick="closeIntroModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <h4>Start here</h4>
+        <div class="quality-note">
+          This app is an educational reference, not medical advice. It helps you browse peptides by goal, compare evidence/risk, calculate reconstitution math, and build private local stacks.
+        </div>
+      </div>
+      <div class="modal-section">
+        <h4>Privacy</h4>
+        <p>Your stacks and dose logs save only in this browser's localStorage. They are not synced to James, your friend, GitHub, or any shared database.</p>
+      </div>
+      <div class="modal-section">
+        <h4>How to use it</h4>
+        <ul style="color:var(--text-secondary);line-height:1.75;margin-left:1.1rem;">
+          <li><strong>Browse</strong> to search all peptide profiles.</li>
+          <li><strong>Goals</strong> to filter by fat loss, healing, recovery, cognition, longevity, and more.</li>
+          <li><strong>Calculator</strong> for reconstitution math.</li>
+          <li><strong>Stack</strong> to build a local stack and review warnings before acting.</li>
+        </ul>
+      </div>
+      <div class="report-action-row">
+        <button class="report-btn primary" onclick="closeIntroModal()">I understand — open the app</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeIntroModal() {
+  storeSet('introSeen_v2', true);
+  closeModal();
+}
+
 // === INIT ===
 initFilters();
 renderBrowse();
